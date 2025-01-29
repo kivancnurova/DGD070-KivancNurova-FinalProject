@@ -36,6 +36,7 @@ public class GameController : MonoBehaviour
             .Add(new PlayerMovementSystem(contexts))
             .Add(new PadTriggerSystem(contexts))
             .Add(new RenderPositionSystem(contexts))
+            .Add(new WinScreenSystem(contexts))
             .Add(new PadColorChangeSystem(contexts));
     }
 }

@@ -63,6 +63,13 @@ public class PadTriggerSystem : ReactiveSystem<GameEntity>
     private void ShowWinScreen()
     {
         Debug.Log("A WINRAR IS YOU!");
+
+        var contexts = Contexts.sharedInstance;
+        var winEntity = contexts.game.CreateEntity();
+        winEntity.AddWinScreen(true);
+
+        var playerEntity = _playerGroup.GetSingleEntity();
+        playerEntity.Destroy();
     }
 
     private void ResetGame()
