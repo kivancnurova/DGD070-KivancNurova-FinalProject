@@ -62,7 +62,7 @@ public class PadTriggerSystem : ReactiveSystem<GameEntity>
 
     private void ShowWinScreen()
     {
-        Debug.Log("A WINRAR IS YOU!");
+        Debug.Log("A WINRAR IS YOU");
 
         var contexts = Contexts.sharedInstance;
         var winEntity = contexts.game.CreateEntity();
