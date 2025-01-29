@@ -2,10 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Entitas;
+using System.Linq;
 
 public class PadColorChangeSystem : ReactiveSystem<GameEntity>
 {
-    public PadColorChangeSystem(Contexts contexts) : base(contexts.game) {}
+    private readonly IGroup<GameEntity> _padsGroup;
+
+    public PadColorChangeSystem(Contexts contexts) : base(contexts.game) 
+    {
+        _padsGroup = contexts.game.GetGroup(GameMatcher.AllOf(GameMatcher.Pad, GameMatcher.View));
+    }
 
     protected override ICollector<GameEntity> GetTrigger(IContext<GameEntity> context)
     {
@@ -19,11 +25,23 @@ public class PadColorChangeSystem : ReactiveSystem<GameEntity>
 
     protected override void Execute(List<GameEntity> entities)
     {
-        foreach (var entity in entities)
+        bool isReset = entities.Any(e => e.pad.isTriggered == false);
+        
+        if (isReset)
         {
-            if (entity.pad.isTriggered)
+            foreach (var pad in _padsGroup.GetEntities())
             {
-                entity.view.spriteRenderer.color = Color.green;
+                pad.view.spriteRenderer.color = Color.white;
+            }
+        }
+        else
+        {
+            foreach (var entity in entities)
+            {
+                if (entity.pad.isTriggered)
+                {
+                    entity.view.spriteRenderer.color = Color.green;
+                }
             }
         }
     }

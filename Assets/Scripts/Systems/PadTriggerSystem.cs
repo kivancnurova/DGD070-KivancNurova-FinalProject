@@ -7,12 +7,14 @@ public class PadTriggerSystem : ReactiveSystem<GameEntity>
 {
     private readonly IGroup<GameEntity> _playerGroup;
     private readonly IGroup<GameEntity> _padsGroup;
+    private readonly IGroup<GameEntity> _sequenceGroup;
     private int _triggeredPadCount = 0;
 
     public PadTriggerSystem(Contexts contexts) : base(contexts.game)
     {
         _playerGroup = contexts.game.GetGroup(GameMatcher.AllOf(GameMatcher.Player, GameMatcher.Position));
         _padsGroup = contexts.game.GetGroup(GameMatcher.AllOf(GameMatcher.Pad, GameMatcher.Position));
+        _sequenceGroup = contexts.game.GetGroup(GameMatcher.PadSequence);
     }
 
     protected override ICollector<GameEntity> GetTrigger(IContext<GameEntity> context)
@@ -28,20 +30,31 @@ public class PadTriggerSystem : ReactiveSystem<GameEntity>
     protected override void Execute(List<GameEntity> entities)
     {
         var playerEntity = _playerGroup.GetSingleEntity();
+        var sequenceEntity = _sequenceGroup.GetSingleEntity();
         Vector2 playerPos = playerEntity.position.value;
 
         foreach (var padEntity in _padsGroup.GetEntities())
         {
             if (!padEntity.pad.isTriggered && Vector2.Distance(playerPos, padEntity.position.value) < 1f)
             {
-                padEntity.ReplacePad(padEntity.pad.padId, true);
-                _triggeredPadCount++;
-
-
-
-                if (_triggeredPadCount >= 4)
+                if (padEntity.pad.padId == sequenceEntity.padSequence.correctSequence[sequenceEntity.padSequence.currentSequenceIndex])
                 {
-                    ShowWinScreen();
+                    padEntity.ReplacePad(padEntity.pad.padId, true);
+                    
+                    sequenceEntity.ReplacePadSequence(
+                        sequenceEntity.padSequence.currentSequenceIndex + 1,
+                        sequenceEntity.padSequence.correctSequence
+                    );
+                    _triggeredPadCount++;
+
+                    if (_triggeredPadCount >= 4)
+                    {
+                        ShowWinScreen();
+                    }
+                }
+                else
+                {
+                    ResetGame();
                 }
             }
         }
@@ -50,5 +63,20 @@ public class PadTriggerSystem : ReactiveSystem<GameEntity>
     private void ShowWinScreen()
     {
         Debug.Log("A WINRAR IS YOU!");
+    }
+
+    private void ResetGame()
+    {
+        _triggeredPadCount = 0;
+        var sequenceEntity = _sequenceGroup.GetSingleEntity();
+        sequenceEntity.ReplacePadSequence(0, sequenceEntity.padSequence.correctSequence);
+
+        foreach (var padEntity in _padsGroup.GetEntities())
+        {
+            padEntity.ReplacePad(padEntity.pad.padId, false);
+        }
+
+        var playerEntity = _playerGroup.GetSingleEntity();
+        playerEntity.ReplacePosition(Vector2.zero);
     }
 }

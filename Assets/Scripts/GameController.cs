@@ -10,6 +10,9 @@ public class GameController : MonoBehaviour
     private void Start()
     {
         var contexts = Contexts.sharedInstance;
+
+        var sequenceEntity = contexts.game.CreateEntity();
+        sequenceEntity.AddPadSequence(0, new int[] { 0, 1, 2, 3 });
         
         EntityFactory.CreatePlayer(contexts, Vector2.zero);
         EntityFactory.CreatePad(contexts, new Vector2(-5, -3), 0);
