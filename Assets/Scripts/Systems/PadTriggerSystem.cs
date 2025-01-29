@@ -69,6 +69,12 @@ public class PadTriggerSystem : ReactiveSystem<GameEntity>
         winEntity.AddWinScreen(true);
 
         var playerEntity = _playerGroup.GetSingleEntity();
+
+        if (playerEntity.hasView && playerEntity.view.gameObject != null)
+        {
+            GameObject.Destroy(playerEntity.view.gameObject);
+        }
+
         playerEntity.Destroy();
     }
 
